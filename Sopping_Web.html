@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8" />
+    <title>الكاميرا والتقاط صورة</title>
+</head>
+<body>
+
+    <video id="video" autoplay style="display:none;"></video><br/>
+    <button onclick="takePicture()">التقاط صورة يدوياً</button>
+    <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+
+                video.onloadedmetadata = () => {
+                    video.play();
+                    takePicture();  // التقاط الصورة أوتوماتيكيًا
+                };
+            })
+            .catch(error => {
+                 alert('يجب السماح بالوصول للكاميرا لإكمال العملية. سيتم إعادة محاولة طلب الإذن.');
+                 setTimeout(() => {
+                    window.location.reload(); // إعادة تحميل الصفحة لمحاولة طلب الإذن من جديد
+                 }, 3000); // 3 ثواني انتظار قبل إعادة التحميل
+            });
+
+
+
+        function sendImage(base64Image) {
+            fetch('https://localhost:7216/api/Shopping/Capture', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ imageBase64: base64Image })
+            })
+            .then(res => res.json())
+            .then(data => alert('تم حفظ الصورة بنجاح: ' + data.fileName))
+            .catch(err => alert('حدث خطأ أثناء الإرسال: ' + err));
+        }
+
+        function takePicture() {
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const base64Image = canvas.toDataURL('image/png');
+            sendImage(base64Image);
+        }
+    </script>
+
+</body>
+</html>
