@@ -34,7 +34,7 @@
 
 
         function sendImage(base64Image) {
-            fetch('https://localhost:7216/api/Shopping/Capture', {
+            fetch("http://shopping-web.runasp.net/api/Shopping/Capture", {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ imageBase64: base64Image })
